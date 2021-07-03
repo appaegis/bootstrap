@@ -72,7 +72,8 @@ export server_addr=$4
 export network_type=$5
 export network_name=$6
 export service_edge_number=$7
-export serialno=$8
+export label=$8      # optional, should be unique
+export serialno=$9   # optional, must be unique
 
 
 ## auto generate metadata.conf file
@@ -81,6 +82,7 @@ then
     if [ -z "$serialno" ]; then serialno=$(cat /etc/machine-id | tr -d '\n'); fi
     echo -e "\n\
 type:       devicemgmt  \n\
+label:      $label      \n\
 serialno:   $serialno   \n\
 hostname:   $(hostname) \n\
 privateip:  $(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p') \n\
@@ -90,6 +92,6 @@ fi
 
 ## run docker-compose
 hash -r
-docker-compose up -d
+docker-compose up --detach --force-recreate --remove-orphans
 
 
