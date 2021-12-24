@@ -27,6 +27,18 @@ then
 fi
 
 
+## setup docker-compose
+export auth_token=$1
+export auth_secret=$2
+export server_validation_code=$3
+export server_addr=$4
+export network_type=$5
+export network_name=$6
+export service_edge_number=$7
+export label=$8      # optional, should be unique
+export serialno=$9   # optional, must be unique
+
+
 ## copy yaml file
 cat << EOF > docker-compose.yml
 version: '3'
@@ -39,13 +51,13 @@ services:
     depends_on:
       - updater
     environment:
-      - auth_token
-      - auth_secret
-      - server_validation_code
-      - server_addr
-      - network_type
-      - network_name
-      - service_edge_number
+      - auth_token="$auth_token"
+      - auth_secret="$auth_secret"
+      - server_validation_code="$server_validation_code"
+      - server_addr="$server_addr"
+      - network_type="$network_type"
+      - network_name="$network_name"
+      - service_edge_number="$service_edge_number"
     volumes:
       - ./:/home/se/conf/
     logging:
@@ -62,18 +74,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --debug --label-enable=true --http-api=true
 EOF
-
-
-## setup docker-compose
-export auth_token=$1
-export auth_secret=$2
-export server_validation_code=$3
-export server_addr=$4
-export network_type=$5
-export network_name=$6
-export service_edge_number=$7
-export label=$8      # optional, should be unique
-export serialno=$9   # optional, must be unique
 
 
 ## auto generate metadata.conf file
