@@ -13,17 +13,29 @@ cd se
 ## test and install docker
 if ! command -v docker &> /dev/null
 then
-    echo "Install Docker"
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sh get-docker.sh
+    echo "Install docker"
+    if uname -a |grep amzn2 &> /dev/null
+    then
+    # for Amazon Linux 2
+        yum update
+        yum install docker
+        systemctl enable docker.service
+        systemctl start docker.service
+    else
+    # for other Linux
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sh get-docker.sh
+    fi
 fi
 
 
 ## test and install docker-compose
 if ! command -v docker-compose &> /dev/null
 then
-    curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    echo "Install docker-compose"
+    curl -L "https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
+    ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 fi
 
 
