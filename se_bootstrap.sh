@@ -17,10 +17,10 @@ then
     if uname -a |grep amzn2 &> /dev/null
     then
     # for Amazon Linux 2
-        yum update
-        yum install docker
-        systemctl enable docker.service
-        systemctl start docker.service
+        sudo yum update
+        sudo yum install docker
+        sudo systemctl enable docker.service
+        sudo systemctl start docker.service
     else
     # for other Linux
         curl -fsSL https://get.docker.com -o get-docker.sh
@@ -108,6 +108,6 @@ fi
 
 ## run docker-compose
 hash -r
-docker-compose up --detach --force-recreate --remove-orphans
+sudo docker-compose up --detach --force-recreate --remove-orphans
 
 
