@@ -51,8 +51,9 @@ export server_addr=$4
 export network_type=$5
 export network_name=$6
 export service_edge_number=$7
-export label=$8      # optional, should be unique
-export serialno=$9   # optional, must be unique
+export label=$8      # only applicable to device-mesh, should be unique
+export serialno=$9   # only applicable to device-mesh, must be unique
+export proxyUrl=$10  # if need to connect through proxy. Format is http://[username:password@]proxyAddr
 
 
 ## copy yaml file
@@ -74,6 +75,7 @@ services:
       - network_type="$network_type"
       - network_name="$network_name"
       - service_edge_number="$service_edge_number"
+      - HTTP_PROXY=$proxyUrl
     volumes:
       - ./:/home/se/conf/
     logging:
