@@ -51,9 +51,9 @@ export server_addr=$4
 export network_type=$5
 export network_name=$6
 export service_edge_number=$7
-export label=$8      # only applicable to device-mesh, should be unique
-export serialno=$9   # only applicable to device-mesh, must be unique
-export proxyUrl=$10  # if need to connect through proxy. Format is http://[username:password@]proxyAddr
+export proxyUrl=$8  # if need to connect through proxy. Format is http://[username:password@]proxyAddr
+export label=$9      # only applicable to device-mesh, should be unique
+export serialno=${10}   # only applicable to device-mesh, must be unique
 
 
 ## copy yaml file
