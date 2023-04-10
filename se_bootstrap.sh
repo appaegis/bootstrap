@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ##
-## Bootstrap Appaegis Service Edge container on a Linux host
+## Bootstrap Mammothcyber Service Edge container on a Linux host
 ##
 
 
@@ -62,7 +62,7 @@ version: '3'
 
 services:
   se2:
-    image: appaegis/se:latest
+    image: mammothcyber/se:latest
     network_mode: host
     restart: always
     depends_on:
@@ -85,7 +85,7 @@ services:
         max-file: "10"
         compress: "true"
   updater:
-    image: appaegis/updater:latest
+    image: mammothcyber/updater:latest
     network_mode: host
     restart: always
     volumes:
