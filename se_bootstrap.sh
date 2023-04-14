@@ -51,14 +51,20 @@ export server_addr=$4
 export network_type=$5
 export network_name=$6
 export service_edge_number=$7
-export proxyUrl=$8  # if need to connect through proxy. Format is http://[username:password@]proxyAddr
-export label=$9      # only applicable to device-mesh, should be unique
-export serialno=${10}   # only applicable to device-mesh, must be unique
+export scope=$8
+export projectName=$9
 
+# need add {} if parameter is greater than 10
+export proxyUrl=${10}  # if need to connect through proxy. Format is http://[username:password@]proxyAddr
+export label=${11}      # only applicable to device-mesh, should be unique
+export serialno=${12}   # only applicable to device-mesh, must be unique
 
 ## copy yaml file
 cat << EOF > docker-compose.yml
 version: '3'
+name: $projectName
+volumes:
+  shared:
 
 services:
   se2:
@@ -67,6 +73,8 @@ services:
     restart: always
     depends_on:
       - updater
+    labels:
+      - "com.centurylinklabs.watchtower.scope=$scope"
     environment:
       - auth_token="$auth_token"
       - auth_secret="$auth_secret"
@@ -78,6 +86,7 @@ services:
       - HTTP_PROXY=$proxyUrl
     volumes:
       - ./:/home/se/conf/
+      - shared:/var/shared/
     logging:
       driver: "json-file"
       options:
@@ -88,9 +97,12 @@ services:
     image: mammothcyber/updater:latest
     network_mode: host
     restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.scope=$scope"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --debug --label-enable=true --http-api=true
+      - shared:/var/shared/
+    command: --scope $scope --debug --label-enable=true --http-api=true
 EOF
 
 
