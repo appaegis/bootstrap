@@ -1,8 +1,8 @@
 # SE for Windows
 
-**Warning**
+**Please Read**
 ---
-Running Mammoth SE on Windows is experimental, it is not supported for production.
+Running Mammoth SE on Windows is in **preview**, it is not recommended for production environment.
 
 # 
 
