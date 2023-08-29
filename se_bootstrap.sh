@@ -97,6 +97,7 @@ services:
     image: mammothcyber/updater:latest
     network_mode: host
     restart: always
+    privileged: true
     labels:
       - "com.centurylinklabs.watchtower.scope=$scope"
     volumes:
