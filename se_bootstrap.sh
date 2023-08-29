@@ -92,6 +92,7 @@ services:
       options:
         max-size: "2m"
         max-file: "10"
+        compress: "true"
   updater:
     image: mammothcyber/updater:latest
     network_mode: host
