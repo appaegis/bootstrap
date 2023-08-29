@@ -62,7 +62,6 @@ export serialno=${12}   # only applicable to device-mesh, must be unique
 ## copy yaml file
 cat << EOF > docker-compose.yml
 version: '3'
-name: $projectName
 volumes:
   shared:
 
@@ -92,11 +91,11 @@ services:
       options:
         max-size: "2m"
         max-file: "10"
-        compress: "true"
   updater:
     image: mammothcyber/updater:latest
     network_mode: host
     restart: always
+    privileged: true
     labels:
       - "com.centurylinklabs.watchtower.scope=$scope"
     volumes:
