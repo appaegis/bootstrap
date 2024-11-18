@@ -2,28 +2,21 @@
 
 **Please Read**
 ---
-Running Mammoth SE on Windows is in **preview**, it is not recommended for production environment.
+Running Mammoth SE on Windows is in **preview**, please read carefully if you plan to use it for production purposes.
+---
+- The connector process does not restart automatically after it is terminated
+- Version update has to be performed manually
 
 # 
 
 # Install steps
 
-- Copy zip file contains setup script and runtime binary to target Windows system
-- After decompression, open a command window as **Administrator** and find the directory with the unzipped files.
-- Next run the setup script: se_bootstrap_win.bat with parameters. **How to get these parameters:**
-  1. From our admin console, find the Network and ServiceEdge you are trying to configure
-  2. Copy the "Bootstrap script for Linux"
-  3. Paste it to a Notepad on the Window PC you are trying to setup SE
-  4. The original content will look like the first code block below, you need to remove the first two lines and change last line's command to "se_bootstrap_win.bat", but keep all the parameters.
-```
-#!/usr/bin/env bash
-curl -fsSL https://raw.githubusercontent.com/appaegis/bootstrap/master/se_bootstrap.sh -o se_bootstrap.sh
-bash se_bootstrap.sh "token" "secret" "token" "addr" "type" "nw name" "number"...
-```
-Edit into
-```
-se_bootstrap_win.bat "token" "secret" "token" "addr" "type" "nw name" "number"...
-```
-
-- Once the script is completed, your Windows should be running the SE as a service.
-
+- Download the `se_bootstrap_win.bat` file from this repo, save it to a dedicated folder on the Windows PC that will be used as Service Edge.
+- From Mammoth management portal, find the Service Edge's configuration, download the "Bootstrap script for Linux" file `bootstrap.sh` and save to the same folder. This file contain configuration and settings specific to this Service Edge and is required to continue the setup.
+- *Optionally download the zip file `win-bootstrap.zip` that contains runtime binary and save to the same folder. This step is optional because the setup script can download it as well.*
+- Then run the `se_bootstrap_win.bat` either from a command window or by clicking it. It will ask for **Administrator** privilege automatically, and that's the last step of the installation.
+- *Optionally check install components and clean up*
+  - *Check the installation path at: `C:\ProgramData\Mammoth\se_win`*
+  - *Check running process `mammothfrpc.exe`*
+  - *Check the autostart task `schtasks /query /v /fo list /tn mammoth-se2-task`*
+  - *Remove bootstrapping files no longer needed: Any files within the folder where you save/run the `se_bootstrap_win.bat` can be deleted at this point.*
