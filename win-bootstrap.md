@@ -2,28 +2,21 @@
 
 **Please Read**
 ---
-Running Mammoth SE on Windows is in **preview**, it is not recommended for production environment.
+Running Mammoth SE on Windows is in **preview**, please read carefully if you plan to use it for production purposes.
+---
+- The connector process does not restart automatically after it is terminated
+- Version update has to be performed manually
 
 # 
 
 # Install steps
 
-- Copy zip file contains setup script and runtime binary to target Windows system
-- After decompression, open a command window as **Administrator** and find the directory with the unzipped files.
-- Next run the setup script: se_bootstrap_win.bat. Note you must provide the following parameters to se_bootstrap_win.bat:
-```
-auth_token
-auth_secret
-server_validation_code
-server_addr
-network_type
-network_name
-service_edge_number
-proxyUrl (only if you connect the internet through proxy)
-label (only if configured as devicemesh)
-serialno (only if configured as devicemesh)
-```
-
-- You can get these parameters from the network bootstrap script of our admin console.
-- Once the script is completed, your Windows should be running the SE as a service.
-
+- Download the `se_bootstrap_win.bat` file from this repo, save it to a dedicated folder on the Windows PC that will be used as Service Edge.
+- From Mammoth management portal, find the Service Edge's configuration, download the "Bootstrap script for Linux" file `bootstrap.sh` and save to the same folder. This file contain configuration and settings specific to this Service Edge and is required to continue the setup.
+- *Optionally download the zip file `win-bootstrap.zip` that contains runtime binary and save to the same folder. This step is optional because the setup script can download it as well.*
+- Then run the `se_bootstrap_win.bat` either from a command window or by clicking it. It will ask for **Administrator** privilege automatically, and that's the last step of the installation.
+- *Optionally check install components and clean up*
+  - *Check the installation path at: `C:\ProgramData\Mammoth\se_win`*
+  - *Check running process `mammothfrpc.exe`*
+  - *Check the autostart task `schtasks /query /v /fo list /tn mammoth-se2-task`*
+  - *Remove bootstrapping files no longer needed: Any files within the folder where you save/run the `se_bootstrap_win.bat` can be deleted at this point.*
