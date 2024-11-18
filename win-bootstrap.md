@@ -11,9 +11,9 @@ Running Mammoth SE on Windows is in **preview**, please read carefully if you pl
 
 # Install steps
 
-- Download the `se_bootstrap_win.bat` file from this repo, save it to a dedicated folder on the Windows PC that will be used as Service Edge.
+- Download the [`se_bootstrap_win.bat`](se_bootstrap_win.bat) file from this repo, save it to a dedicated folder on the Windows PC that will be used as Service Edge.
 - From Mammoth management portal, find the Service Edge's configuration, download the "Bootstrap script for Linux" file `bootstrap.sh` and save to the same folder. This file contain configuration and settings specific to this Service Edge and is required to continue the setup.
-- *Optionally download the zip file `win-bootstrap.zip` that contains runtime binary and save to the same folder. This step is optional because the setup script can download it as well.*
+- *Optionally download the zip file [`win-bootstrap.zip`](win-bootstrap.zip) that contains runtime binary and save to the same folder. This step is optional because the setup script can download it as well.*
 - Then run the `se_bootstrap_win.bat` either from a command window or by clicking it. It will ask for **Administrator** privilege automatically, and that's the last step of the installation.
 - *Optionally check install components and clean up*
   - *Check the installation path at: `C:\ProgramData\Mammoth\se_win`*
