@@ -1,4 +1,4 @@
-# SE for Windows
+# Deploy SE for Windows
 
 **Please Read**
 ---
