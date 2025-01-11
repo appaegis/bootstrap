@@ -43,6 +43,14 @@ then
 fi
 
 
+## start docker service just in case (such as on RHEL)
+if systemctl is-active --quiet docker; then
+    echo "docker service is running."
+else
+    sudo systemctl start docker | true
+fi
+
+
 ## setup docker-compose
 export auth_token=$1
 export auth_secret=$2
