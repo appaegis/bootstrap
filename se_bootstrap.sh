@@ -11,7 +11,7 @@ cd se
 
 
 ## test and install docker
-if ! command -v docker &> /dev/null
+if ! command -v dockerd &> /dev/null
 then
     echo "Install docker"
     if uname -a |grep amzn2 &> /dev/null
@@ -48,6 +48,7 @@ if systemctl is-active --quiet docker; then
     echo "docker service is running."
 else
     sudo systemctl start docker | true
+    sudo systemctl enable docker | true
 fi
 
 
@@ -69,7 +70,6 @@ export serialno=${12}   # only applicable to device-mesh, must be unique
 
 ## copy yaml file
 cat << EOF > docker-compose.yml
-version: '3'
 name: $projectName
 volumes:
   shared:
