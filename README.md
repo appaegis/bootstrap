@@ -11,7 +11,8 @@ so that your users can access internal servers behind SE from the Mammoth Enterp
 | Docker Desktop on Windows | Not tested |  |
 | Kubernetes | Supported | helm value file |
 | Linux VM in public cloud | Supported | bootstrap script as userdata |
-| [`Linux VM on VMware`](vmware-bootstrap.md) | Supported | bootstrap script as userdata |
+| [`Linux VM on VMware - manual install`](vmware-bootstrap.md) | Supported | bootstrap script as userdata |
+| [`Linux VM on VMware - prebuilt template`](vmware-prebuilt.md) | Supported | bootstrap script as userdata |
 | Generic Linux | Supported | bootstrap script |
 | [`Windows Native Agent`](win-bootstrap.md) | Preview | bootstrap script |
 
