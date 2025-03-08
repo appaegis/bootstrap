@@ -14,41 +14,27 @@ sanitize_filename() {
 
 ###
 ### Description:
-### With this script, setup SE container as systemd unit
+### With this script, setup SE binary executable as systemd unit
 ###
 cat <<EOF
 Description:
-    With this script, load SE container image and setup SE container as systemd unit.
+    With this script, unpack SE binary, install under /var/mammoth-se and setup SE instance as systemd unit.
 
-Usage: $0 [image-se.tar] or $0 -uninstall
+Usage: $0 [zip-se.tgz] or $0 -uninstall
     Files required within same directory:
         1. bootstrap.sh - this is the configuration file
-        2. image-se.tar - the docker image file. You can provide a different file name as an argument. 
-            Either tar or tar.gz format can be provided.
+        2. zip-se.tgz - the pack file contains SE binary and server certificate. You can provide a different file name as an argument. 
 
     Result:
-        1. Load the SE container image
+        1. Install SE binary and cert under /var/mammoth-se
         2. Extract the parameters from the bootstrap.sh
-        3. Add and run SE container as systemd unit
+        3. Add and run SE binary as systemd unit
 
 EOF
 
 ###
 ## Step1: check runtime environment
 ###
-# Check if Docker exists
-if command -v docker &> /dev/null; then
-    DOCKER="docker"
-# If Docker doesn't exist, check for Podman
-elif command -v podman &> /dev/null; then
-    DOCKER="podman"
-else
-    echo "Neither Docker nor Podman found. Exiting..."
-    exit 1
-fi
-# Print the selected container runtime
-echo "Container engine: $DOCKER"
-
 # Check if running as root
 if [[ "$EUID" -ne 0 ]]; then
     echo "Error: This script must be run as root or with sudo."
@@ -56,8 +42,7 @@ if [[ "$EUID" -ne 0 ]]; then
 fi
 
 echo "Running as root. Proceeding with installation..."
-IMAGE_FILE="${1:-image-se.tar}"
-IMAGE_FILE="${IMAGE_FILE%.gz}"
+IMAGE_FILE="${1:-zip-se.tgz}"
 
 if echo "$@" | grep -qiE '(^| )(-uninstall|--uninstall)( |$)'; then
     UNINSTALL=true
@@ -125,7 +110,7 @@ DESTDIR="/var/lib/mammoth-se/${projectName}"
 mkdir -p "$DESTDIR"
 
 SERVICE_NAME="mammoth-se.${projectName}"
-SERVICE_PATH="/etc/containers/systemd/$SERVICE_NAME.container"
+SERVICE_PATH="/etc/systemd/system/$SERVICE_NAME.service"
 
 # now prepare the environment file
 SEENV="$DESTDIR/se.env"
@@ -152,56 +137,55 @@ fi
 ## Option: uninstall
 ###
 if [[ "${UNINSTALL,,}" == "true" ]]; then
-    echo "Uninstalling Quadlet service '$SERVICE_NAME'..."
+    echo "Uninstalling Systemd service '$SERVICE_NAME'..."
     systemctl stop $SERVICE_NAME
     systemctl disable $SERVICE_NAME
     rm -f "$SERVICE_PATH"
     rm -rf "$DESTDIR"
     systemctl daemon-reload
-    echo "Quadlet service '$SERVICE_NAME' uninstalled successfully."
+    echo "Systemd service '$SERVICE_NAME' uninstalled successfully."
     exit 0
 fi
 
 
 ###
-## Step3: load image from local if exist
+## Step3: unpack and install
 ###
-# Check if the file exists or need to unzip
-if [[ ! -f "$IMAGE_FILE" ]]; then
-    if [[ ! -f "$IMAGE_FILE.gz" ]]; then
-        echo "Error: File '$IMAGE_FILE' or '$IMAGE_FILE.gz' not found!"
-        exit 1
-    else
-        echo "Unzipping $IMAGE_FILE.gz"
-        gunzip -k "$IMAGE_FILE.gz"
-        if [[ ! -f "$IMAGE_FILE" ]]; then
-            echo "Unzip failed!"
-            exit 1
-        fi
-    fi
-fi
+DESTBIN="$DESTDIR/appaegis-se2"
+tar -xzf "$IMAGE_FILE" --no-same-owner -C "$DESTDIR"
+chmod +x "$DESTBIN"
+dir -l "$DESTDIR"
 
-# Run docker image load and capture the output
-OUTPUT=$($DOCKER image load -i $IMAGE_FILE 2>&1)
-
-# Extract the Image ID using grep and awk
-IMAGE_ID=$(echo "$OUTPUT" | grep -oE 'image.+sha256:[a-f0-9]+' | head -n 1 | sed -n 's/.*sha256:\([a-f0-9]\+\).*/\1/p' | cut -c 1-12)
-
-# Check if IMAGE_ID is found
-if [[ -n "$IMAGE_ID" ]]; then
-    echo "Loaded $IMAGE_FILE as Image ID: $IMAGE_ID"
-else
-    echo "Failed to extract Image ID"
+if [[ ! -f "$DESTBIN" ]]; then
+    echo "Error: SE binary '$DESTBIN' not found."
     exit 1
 fi
 
 
+SEINI="$DESTDIR/frpc.ini"
+cat <<EOF > "$SEINI"
+[common]
+tls_enable=true
+tls_trusted_ca_file = $DESTDIR/isrgrootx1_and_trustid-x3-root.pem
+login_fail_exit=false
+EOF
+
+# below is SE Linux stuff
+FILE_TYPE=NetworkManager_exec_t
+for file in "$DESTDIR"/*; do
+    echo "Setting SELinux context for $file"
+    semanage fcontext -a -t $FILE_TYPE "$file"  || true
+    restorecon -v "$file"                       || true
+done
+
+
+
 ###
-## Finally: add and run SE container as systemd unit
+## Finally: add and run SE binary as systemd unit
 ###
 # do this again in case any new files are added
 chmod --preserve-root --recursive go= "$DESTDIR"
-# Define the Quadlet service file path
+# Define the systemd service file path
 
 # Check if the service is already running
 if systemctl is-active --quiet "$SERVICE_NAME"; then
@@ -212,37 +196,25 @@ fi
 # Ensure the target directory exists
 mkdir -p $(dirname "$SERVICE_PATH")
 
-# Generate the Quadlet service file using a heredoc
+# Generate the systemd service file using a heredoc
 cat <<EOF > "$SERVICE_PATH"
 [Unit]
-Description=Mammoth Cyber Service Edge Container ${projectName}
-# below should be added automatically but just in case
+Description=Mammoth Cyber Service Edge native binary ${projectName}
 After=network-online.target
 Requires=network-online.target
 
-[Container]
-Label="com.centurylinklabs.watchtower.scope=$scope"
-ContainerName=${projectName}.se
-Image=$IMAGE_ID
-Network=host
-EnvironmentFile="$SEENV"
-
-# Volumes
-# Volume=.:/home/se/conf/
-# Volume=shared:/var/shared/
-
-# Logging options
-LogDriver=journald
-
-# below options are not supported by older quadlet
-# LogDriver=json-file
-# LogOpt=max-size=2m
-# LogOpt=max-file=10
-# LogOpt=compress=true
-
 [Service]
+EnvironmentFile=$SEENV
+ExecStart=$DESTBIN
+WorkingDirectory=$DESTDIR
+
 Restart=always
 RemainAfterExit=yes
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+LimitNOFILE=65535
 
 [Install]
 # below should be added automatically but just in case
@@ -252,13 +224,13 @@ EOF
 
 # Confirm the service file was created
 if [[ -f "$SERVICE_PATH" ]]; then
-    echo "Quadlet container service file created at: $SERVICE_PATH"
+    echo "Systemd service file created at: $SERVICE_PATH"
 else
-    echo "Failed to create Quadlet container service file."
+    echo "Failed to create Systemd service file."
     exit 1
 fi
 
-# Reload systemd daemon and enable the Quadlet container
+# Reload systemd daemon and enable the service
 systemctl daemon-reload
 sleep 1
 systemctl enable --now $SERVICE_NAME
@@ -268,9 +240,9 @@ systemctl status $SERVICE_NAME
 
 # Confirm the service is running
 if systemctl is-active --quiet "$SERVICE_NAME"; then
-    echo "Quadlet service '$SERVICE_NAME' has been installed and started successfully."
+    echo "Systemd service '$SERVICE_NAME' has been installed and started successfully."
 else
-    echo "Failed to start Quadlet service '$SERVICE_NAME'. Check logs for details."
+    echo "Failed to start Systemd service '$SERVICE_NAME'. Check logs for details."
     exit 1
 fi
 
