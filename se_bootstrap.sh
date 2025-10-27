@@ -70,7 +70,6 @@ export serialno=${12}   # only applicable to device-mesh, must be unique
 
 ## copy yaml file
 cat << EOF > docker-compose.yml
-name: $projectName
 volumes:
   shared:
 
@@ -131,6 +130,6 @@ fi
 
 ## run docker-compose
 hash -r
-sudo docker-compose up --detach --force-recreate --remove-orphans
+sudo docker-compose -p "$projectName" up --detach --force-recreate --remove-orphans
 
 
