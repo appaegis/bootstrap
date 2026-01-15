@@ -76,9 +76,8 @@ volumes:
 services:
   node-exporter:
     image: prom/node-exporter:latest
+    network_mode: host
     restart: unless-stopped
-    ports:
-      - 9100:9100
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -105,6 +104,9 @@ services:
       - network_type="$network_type"
       - network_name="$network_name"
       - service_edge_number="$service_edge_number"
+      - metrics_server="http://127.0.0.1:9100/metrics"
+      - streaming_server_metrics_port="9101"
+      - streaming_server_updater_port="7402"
       - HTTP_PROXY=$proxyUrl
     volumes:
       - ./:/home/se/conf/
