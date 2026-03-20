@@ -61,7 +61,7 @@ export network_type=$5
 export network_name=$6
 export service_edge_number=$7
 export scope=$8
-export projectName=$9
+export projectName=${9,,}
 
 # need add {} if parameter is greater than 10
 export proxyUrl=${10}  # if need to connect through proxy. Format is http://[username:password@]proxyAddr
