@@ -61,7 +61,7 @@ export network_type=$5
 export network_name=$6
 export service_edge_number=$7
 export scope=$8
-export projectName=$9
+export projectName=${9,,}
 
 # need add {} if parameter is greater than 10
 export proxyUrl=${10}  # if need to connect through proxy. Format is http://[username:password@]proxyAddr
@@ -74,6 +74,20 @@ volumes:
   shared:
 
 services:
+  node-exporter:
+    image: prom/node-exporter:latest
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--no-collector.arp'
   se2:
     image: mammothcyber/se:latest
     network_mode: host
@@ -90,6 +104,9 @@ services:
       - network_type="$network_type"
       - network_name="$network_name"
       - service_edge_number="$service_edge_number"
+      - metrics_server="http://127.0.0.1:9100/metrics"
+      - streaming_server_metrics_port="9101"
+      - streaming_server_updater_port="7402"
       - HTTP_PROXY=$proxyUrl
     volumes:
       - ./:/home/se/conf/
